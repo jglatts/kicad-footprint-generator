@@ -36,23 +36,40 @@ class Zwrap387Footprint():
             self.kicad_mod.setDescription("footprint for wrap-387 pads")
             self.kicad_mod.setTags("zacc footprint")            
 
+    def inToMM(self, val)
+        return val * 25.4
+
     def createPads(self):
         padNumber = 1
         padX = 0
-        pitchX = .0045 * 25.4
+        padY = 0
+        pitchX = self.inToMM(0.0045)
+        pitchY = self.inToMM(0.33)
         numPads = 216
+        numCols = 29
 
+        # makes 1 complete Y column of pads
+        # can be used to make full FPC Panel footprint 
+        # by duplicating in X direction with ROUTED traces
         for i in range(numPads):
-            # make the coppers pad
-            self.kicad_mod.append(Pad(number=padNumber, type=Pad.TYPE_SMT, 
-                                      shape=Pad.SHAPE_RECT, at=[padX,0], 
-                                      size=[0.002*25.4,0.234*25.4], layers=['F.Cu']))
-            
-            self.kicad_mod.append(Pad(number=padNumber+1, type=Pad.TYPE_SMT, 
-                                      shape=Pad.SHAPE_RECT, at=[padX,0.33*25.4], 
-                                      size=[0.002*25.4,0.234*25.4], layers=['F.Cu']))
-            padNumber += 2
+            # make the copper pads
+            for j in range(numCols):
+                pad_width  = self.inToMM(0.002)
+                pad_height = self.inToMM(0.234)
+                pad = Pad(
+                    number=padNumber,
+                    type=Pad.TYPE_SMT,
+                    shape=Pad.SHAPE_RECT,
+                    at=[padX, padY],
+                    size=[pad_width, pad_height],
+                    layers=['F.Cu','F.Mask'], 
+                    mask=[pad_width-0.1, pad_height-0.1]  
+                )
+                self.kicad_mod.append(pad)
+                padNumber += 1
+                padY += pitchY
             padX += pitchX
+            padY = 0
 
     def printFootprintInfo(self): 
         print(self.kicad_mod)
@@ -68,7 +85,6 @@ class Zwrap387Footprint():
         self.createPads()
         self.printFootprintInfo()
         self.save(self.footprint_name + ".kicad_mod")        
-
 
 
 if __name__ == '__main__':
