@@ -26,44 +26,42 @@ sys.path.append('../..') # enable package import from parent directory
 from KicadModTree import *
 from KicadModTree.nodes.specialized.PadArray import PadArray
 
-class Zwrap387Footprint():
-    def __init__(self):
-        self.footprint_name = "zwrap-387-test-pads"
+class GenericElatomerPads():
+    def __init__(self, name):
+        self.footprint_name = name
         self.kicad_mod = Footprint(self.footprint_name)
 
     def setFootprint(self):
         if (self.kicad_mod != None):
-            self.kicad_mod.setDescription("footprint for wrap-387 pads")
-            self.kicad_mod.setTags("zacc footprint")            
+            self.kicad_mod.setDescription("footprint for " + self.footprint_name)
+            self.kicad_mod.setTags("zacc footprint " + self.footprint_name)            
 
     def inToMM(self, val):
         return val * 25.4
 
-    def createPads(self):
+    def createPads(self, numPads=0, numCols=0, pitchX=0, pitchY=0,
+                   padWidth=0, padHeight=0):
         padNumber = 1
         padX = 0
         padY = 0
-        pitchX = self.inToMM(0.0045)
-        pitchY = self.inToMM(0.33)
-        numPads = 216
-        numCols = 29
+        pitchX = self.inToMM(pitchX)
+        pitchY = self.inToMM(pitchY)
+        padWidth = self.inToMM(padWidth)
+        padHeight = self.inToMM(padHeight)
 
         # makes 1 complete Y column of pads
         # can be used to make full FPC Panel footprint 
         # by duplicating in X direction with ROUTED traces
         for i in range(numPads):
-            # make the copper pads
             for j in range(numCols):
-                pad_width  = self.inToMM(0.002)
-                pad_height = self.inToMM(0.234)
                 pad = Pad(
                     number=padNumber,
                     type=Pad.TYPE_SMT,
                     shape=Pad.SHAPE_RECT,
                     at=[padX, padY],
-                    size=[pad_width, pad_height],
+                    size=[padWidth, padHeight],
                     layers=['F.Cu','F.Mask'], 
-                    mask=[pad_width-0.1, pad_height-0.1]  
+                    mask=[padWidth-0.1, padHeight-0.1]  
                 )
                 self.kicad_mod.append(pad)
                 padNumber += 1
@@ -78,14 +76,19 @@ class Zwrap387Footprint():
 
     def save(self, name):
         file_handler = KicadFileHandler(self.kicad_mod)
-        file_handler.writeFile(name)
+        file_handler.writeFile(self.footprint_name)
     
     def makeFootprint(self):
         self.setFootprint()
-        self.createPads()
+
+        # have this data come from a param dict or similar
+        self.createPads(numPads=216, numCols=29, 
+                        pitchX=0.0045, pitchY=0.33,
+                        padWidth=0.002, padHeight=0.234)
+        
         self.printFootprintInfo()
         self.save(self.footprint_name + ".kicad_mod")        
 
 
 if __name__ == '__main__':
-    Zwrap387Footprint().makeFootprint()
+    GenericElatomerPads("testing-generic-pads").makeFootprint()
