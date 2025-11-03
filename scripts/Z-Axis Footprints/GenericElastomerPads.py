@@ -76,19 +76,21 @@ class GenericElatomerPads():
 
     def save(self, name):
         file_handler = KicadFileHandler(self.kicad_mod)
-        file_handler.writeFile(self.footprint_name)
+        file_handler.writeFile(name)
     
-    def makeFootprint(self):
+    def makeFootprint(self, **kwargs):
         self.setFootprint()
 
-        # have this data come from a param dict or similar
-        self.createPads(numPads=216, numCols=29, 
-                        pitchX=0.0045, pitchY=0.33,
-                        padWidth=0.002, padHeight=0.234)
+        self.createPads(numPads=kwargs['numPads'], numCols=kwargs['numCols'], 
+                        pitchX=kwargs['pitchX'], pitchY=kwargs['pitchY'],
+                        padWidth=kwargs['padWidth'], padHeight=kwargs['padHeight'])
         
         self.printFootprintInfo()
         self.save(self.footprint_name + ".kicad_mod")        
 
 
 if __name__ == '__main__':
-    GenericElatomerPads("testing-generic-pads").makeFootprint()
+    z = GenericElatomerPads("testing-generic-pads-1")
+    z.makeFootprint(numPads=216, numCols=29, 
+                    pitchX=0.0045, pitchY=0.33,
+                    padWidth=0.002, padHeight=0.234)
