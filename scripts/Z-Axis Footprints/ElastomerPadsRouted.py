@@ -75,7 +75,6 @@ class ElastomerPadsRouted():
                 )
                 self.kicad_mod.append(line)
 
-
     def printFootprintInfo(self):
         print(self.kicad_mod.getRenderTree())
 
