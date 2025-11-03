@@ -85,15 +85,35 @@ class ElastomerPadsRouted():
     def makeFootprint(self, **kwargs):
         self.setFootprint()
         self.createPads(**kwargs)
-        self.connectPads(trace_width=0.05)  # add routing
+        self.connectPads(trace_width=0.025)  # add routing
         self.printFootprintInfo()
         self.save(self.footprint_name + ".kicad_mod")
 
 
-if __name__ == '__main__':
+def zfill621():
+    z = ElastomerPadsRouted("zfill-621-rev-b-elastomer-pads")
+    z.makeFootprint(
+        numPads=459, numCols=5,
+        pitchX=0.0045, pitchY=0.36,
+        padWidth=0.002, padHeight=0.136
+    )
+
+def zwrap387():
     z = ElastomerPadsRouted("zwrap-387-elastomer-panel")
     z.makeFootprint(
         numPads=216, numCols=29,
         pitchX=0.0045, pitchY=0.33,
         padWidth=0.002, padHeight=0.234
     )
+
+def zfill622():
+    z = ElastomerPadsRouted("zfill-622-elastomer-pads")
+    z.makeFootprint(
+        numPads=901, numCols=5,
+        pitchX=0.0045, pitchY=0.275,
+        padWidth=0.002, padHeight=0.15
+    )
+
+
+if __name__ == '__main__':
+    zfill622()

@@ -19,10 +19,6 @@ from footprint_scripts_resistorlike import *
 
 
 
-
-
-
-
 if __name__ == '__main__':
     lib_name="${KISYS3DMOD}/Resistor_THT"
 

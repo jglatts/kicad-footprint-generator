@@ -56,15 +56,15 @@ if __name__ == '__main__':
     kicad_mod.append(PadArray(pincount=10,spacing=[1,-1],center=[0,0], initial=5, increment=2, type=Pad.TYPE_SMT, shape=Pad.SHAPE_RECT, size=[1,2], layers=["*.Cu"]))
                           
     # output kicad model
-    #print(kicad_mod)
+    print(kicad_mod)
 
     # print render tree
-    #print(kicad_mod.getRenderTree())
-    #print(kicad_mod.getCompleteRenderTree())
+    print(kicad_mod.getRenderTree())
+    print(kicad_mod.getCompleteRenderTree())
 
     # write file
     file_handler = KicadFileHandler(kicad_mod)
     file_handler.writeFile('example_footprint.kicad_mod')
 
-    
+    print("done!")
     
