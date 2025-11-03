@@ -1,13 +1,10 @@
 import sys
 import os
-from tkinter import SEL
 
 sys.path.append(os.path.join(sys.path[0],".."))
 sys.path.append('../..') # enable package import from parent directory
 
 from KicadModTree import *
-from KicadModTree.nodes.specialized.PadArray import PadArray
-from collections import defaultdict
 
 class PanelCutLines():
     
@@ -18,6 +15,10 @@ class PanelCutLines():
     def inToMM(self, val):
         return val * 25.4
 
+    def save(self):
+        file_handler = KicadFileHandler(self.kicad_mod)
+        file_handler.writeFile(self.footprint_name + ".kicad_mod")
+    
     def makePad(self, padNumber, padWidth, padHeight, x_val, y_val):
         return Pad(
                 number=padNumber,
@@ -35,7 +36,6 @@ class PanelCutLines():
         padNumber = 1
         x_val = 0
         y_val = 0
-
         padWidth = self.inToMM(padWidth)
         padHeight = self.inToMM(padHeight)
         pitchX = self.inToMM(pitchX)
@@ -49,15 +49,15 @@ class PanelCutLines():
             padNumber += 2
             x_val = 0
             y_val += pitchY
+
             self.kicad_mod.append(pad_left)
             self.kicad_mod.append(pad_right)
         
         print(self.kicad_mod.getRenderTree())
-        file_handler = KicadFileHandler(self.kicad_mod)
-        file_handler.writeFile(self.footprint_name + ".kicad_mod")
+        self.save()
 
 
 if __name__ == "__main__":
-    footprint = PanelCutLines("PanelCutLines-Test")
-    footprint.makeCutLines(padWidth=0.5, padHeight=0.002,
-                           pitchX=1.0, pitchY=0.36, numRows=10)
+    PanelCutLines("PanelCutLines-Test").makeCutLines(
+                    padWidth=0.5, padHeight=0.002,
+                    pitchX=1.0, pitchY=0.36, numRows=10)
