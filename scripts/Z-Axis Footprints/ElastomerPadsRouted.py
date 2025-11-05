@@ -1,3 +1,36 @@
+"""
+=====================================================================
+Z-Axis Footprint Generator
+=====================================================================
+
+Author: John Glatts
+Company: Z-Axis Connector Company
+Date: 11-4-2025
+Description:
+    Automated Python script to generate KiCad footprint (.kicad_mod) files
+    for elastomeric pad arrays and related production fixtures.
+
+    The script uses the KicadModTree API to create:
+        - SMT pad arrays for elastomeric connector footprints
+        - Routed copper traces connecting pads within each column
+        - Edge.Cuts outlines with adjustable clearances
+        - Alignment cut-line pads used for strip cutting during production
+
+    This automation eliminates manual KiCad editing, ensuring consistent,
+    dimensionally accurate footprints ready for manufacturing.
+
+Usage:
+    - See driver.py
+
+Dependencies:
+    - Python 3.x
+    - KicadModTree library
+
+Notes:
+    All dimensions in inches are automatically converted to millimeters.
+    Adjust pad pitch, pad count, and clearances per design requirements.
+
+"""
 import sys
 import os
 
@@ -47,7 +80,6 @@ class ElastomerPadsRouted():
                     mask=[padWidth - 0.1, padHeight - 0.1]
                 )
                 self.kicad_mod.append(pad)
-                # Save pad position
                 self.pad_positions.append((padNumber, padX, padY))
                 padNumber += 1
                 padY += pitchY
@@ -56,7 +88,7 @@ class ElastomerPadsRouted():
 
 
     def connectPads(self, trace_width=0.1):
-        """Draw copper lines between pads vertically within each column."""
+        """ Draw copper lines between pads vertically within each column """
         columns = defaultdict(list)
 
         for pad_num, x, y in self.pad_positions:
@@ -183,34 +215,6 @@ class ElastomerPadsRouted():
         self.save(self.footprint_name + ".kicad_mod")
 
 
-def zfill621():
-    z = ElastomerPadsRouted("zfill-621-rev-b-elastomer-pads")
-    z.makeFootprint(
-        numPads=459, numCols=5,
-        pitchX=0.0045, pitchY=0.36,
-        padWidth=0.002, padHeight=0.136
-    )
 
-def zwrap387():
-    z = ElastomerPadsRouted("zwrap-387-elastomer-panel")
-    z.makeFootprint(
-        numPads=216, numCols=29,
-        pitchX=0.0045, pitchY=0.33,
-        padWidth=0.002, padHeight=0.234
-    )
-
-def zfill622ForPCBWay():
-    z = ElastomerPadsRouted("zfill-622-pcbway-pads")
-    # pitchX is wire pitch
-    # pitchY is blank cut dimension (distance between pads vertically)
-    z.makeFootprint(
-        numPads=507, numCols=5,
-        pitchX=0.008, pitchY=0.275,
-        padWidth=0.004, padHeight=0.15,
-        cutPadWidth=0.08, cutPadHeight=0.004 
-    )
-
-
-### detailed docs coming soon
 if __name__ == '__main__':
-    zfill622ForPCBWay()
+    print('please use driver.py!')
