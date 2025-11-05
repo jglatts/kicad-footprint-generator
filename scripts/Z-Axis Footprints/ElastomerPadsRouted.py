@@ -98,17 +98,12 @@ class ElastomerPadsRouted():
         ys = [y for _, _, y in self.pad_positions]
         min_x, max_x = min(xs), max(xs)
         min_y, max_y = min(ys), max(ys)
-
-        # Vertical center of main pad array
-        center_y = (min_y + max_y) / 2
-
-        # Create horizontal cut-line pads at first and last columns
+        
         min_x = min_x - padWidth
         max_x = max_x + padWidth
-
         padNumber = max([n for n, _, _ in self.pad_positions]) + 1
-
         y = 0
+        
         for i in range(numCols):
             cut_pad_left = Pad(
                 number=padNumber,
