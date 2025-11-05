@@ -206,6 +206,8 @@ def zwrap387():
 
 def zfill622ForPCBWay():
     z = ElastomerPadsRouted("zfill-622-pcbway-pads")
+    # pitchX is wire pitch
+    # pitchY is blank cut dimension (distance between pads vertically)
     z.makeFootprint(
         numPads=507, numCols=5,
         pitchX=0.008, pitchY=0.275,
@@ -214,5 +216,6 @@ def zfill622ForPCBWay():
     )
 
 
+### detailed docs coming soon
 if __name__ == '__main__':
     zfill622ForPCBWay()
