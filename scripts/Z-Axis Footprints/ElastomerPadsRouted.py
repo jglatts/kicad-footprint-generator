@@ -13,7 +13,7 @@ class ElastomerPadsRouted():
         self.footprint_name = name
         self.kicad_mod = Footprint(self.footprint_name)
         self.pad_positions = []
-
+        self.cut_pad_positions = []
 
     def setFootprint(self):
         if self.kicad_mod:
@@ -80,57 +80,61 @@ class ElastomerPadsRouted():
                 self.kicad_mod.append(line)
 
 
-    def makeCutLines(self, cutPadWidth=0, cutPadHeight=0, pitchY=0):
-        if not self.pad_positions or cutPadHeight == 0 or cutPadWidth == 0:
+    def makeCutLines(self, cutPadWidth=0, cutPadHeight=0, pitchY=0, numCols=0):
+        """
+            Place horizontal cut-line pads perpendicular to vertical main pads,
+            centered on the first and last columns.
+        """
+        if not self.pad_positions:
             return
 
-        # Convert to mm
+        # Convert dimensions to mm
         padWidth = self.inToMM(cutPadWidth)
         padHeight = self.inToMM(cutPadHeight)
         pitchY = self.inToMM(pitchY)
 
-        # Get the pad bounds
+        # Determine pad bounds
         xs = [x for _, x, _ in self.pad_positions]
         ys = [y for _, _, y in self.pad_positions]
         min_x, max_x = min(xs), max(xs)
         min_y, max_y = min(ys), max(ys)
 
-        # Place cut pads just outside top and bottom
-        cut_rows = [
-            min_y - pitchY,  # below first row
-            max_y + pitchY   # above last row
-        ]
+        # Vertical center of main pad array
+        center_y = (min_y + max_y) / 2
+
+        # Create horizontal cut-line pads at first and last columns
+        min_x = min_x - padWidth
+        max_x = max_x + padWidth
 
         padNumber = max([n for n, _, _ in self.pad_positions]) + 1
 
-        for y in cut_rows:
-            # Left pad 
-            pad_left = Pad(
+        y = 0
+        for i in range(numCols):
+            cut_pad_left = Pad(
                 number=padNumber,
                 type=Pad.TYPE_SMT,
                 shape=Pad.SHAPE_RECT,
                 at=[min_x, y],
                 size=[padWidth, padHeight],
                 layers=['F.Cu', 'F.Mask'],
+                orientation=0  # horizontal
             )
-            padNumber += 1
-
-            # Right pad 
-            pad_right = Pad(
-                number=padNumber,
+            cut_pad_right = Pad(
+                number=padNumber+1,
                 type=Pad.TYPE_SMT,
                 shape=Pad.SHAPE_RECT,
                 at=[max_x, y],
                 size=[padWidth, padHeight],
                 layers=['F.Cu', 'F.Mask'],
+                orientation=0  # horizontal
             )
-            padNumber += 1
+            y += pitchY
+            padNumber += 2
+            self.kicad_mod.append(cut_pad_left)
+            self.kicad_mod.append(cut_pad_right)
 
-            self.kicad_mod.append(pad_left)
-            self.kicad_mod.append(pad_right)
 
-
-    def addEdgeCuts(self, clearanceX=0.5, clearanceY=0.5):
+    def addEdgeCuts(self, clearanceX=1.0, clearanceY=0.5):
         # add edge cuts around the pads with specified clearance
         # units are in MM
         if not self.pad_positions:
@@ -177,8 +181,9 @@ class ElastomerPadsRouted():
         self.setFootprint()
         self.createPads(**kwargs)
         self.connectPads(trace_width=0.004) 
-        self.addEdgeCuts(clearanceX=0.5, clearanceY=2.5)
-        self.makeCutLines(kwargs.get('cutPadWidth', 0), kwargs.get('cutPadHeight', 0), kwargs.get('pitchY', 0))
+        self.addEdgeCuts(clearanceX=3.5, clearanceY=2.5)
+        self.makeCutLines(kwargs.get('cutPadWidth', 0), kwargs.get('cutPadHeight', 0), 
+                          kwargs.get('pitchY', 0), kwargs.get('numCols', 0))
         self.printFootprintInfo()
         self.save(self.footprint_name + ".kicad_mod")
 
@@ -205,7 +210,7 @@ def zfill622ForPCBWay():
         numPads=507, numCols=5,
         pitchX=0.008, pitchY=0.275,
         padWidth=0.004, padHeight=0.15,
-        cutPadWidth=0.01, cutPadHeight=0.004 
+        cutPadWidth=0.08, cutPadHeight=0.004 
     )
 
 
