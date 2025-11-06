@@ -54,21 +54,21 @@ def tester():
 
 # use build pattern like below for more complex parts
 def builderTester():
-    pad = (
+    builder = (
         ElastomerPadBuilder("test-for-groups-builder")
-        .withNumPads(10)
-        .withNumCols(5)
-        .withPitchX(0.008)
+        .withNumPads(217)
+        .withNumCols(15)
+        .withPitchX(0.007874)
         .withPitchY(0.275)
         .withPadWidth(0.004)
         .withPadHeight(0.15)
         .withCutPadWidth(0.08)
         .withCutPadHeight(.004)
-        .withCutGapPart(0.025591)
+        .withCutGapPart(0.018)
         .withNumGroups(5)
         .build()
         )
-    pad.makeFootprint()
+    builder.makeFootprint()
 
 
 if __name__ == "__main__":
