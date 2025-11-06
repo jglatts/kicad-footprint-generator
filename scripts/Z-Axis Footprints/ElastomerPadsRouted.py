@@ -24,7 +24,7 @@ Usage:
 
 Dependencies:
     - Python 3.x
-    - KicadModTree library
+    - KicadModTree library  
 
 Notes:
     All dimensions in inches are automatically converted to millimeters.
@@ -33,6 +33,7 @@ Notes:
 """
 import sys
 import os
+from tkinter import SEL
 
 sys.path.append(os.path.join(sys.path[0],".."))
 sys.path.append('../..') # enable package import from parent directory
@@ -47,6 +48,8 @@ class ElastomerPadsRouted():
         self.kicad_mod = Footprint(self.footprint_name)
         self.pad_positions = []
         self.cut_pad_positions = []
+        # NOTE - add more fields so we can impl builder pattern later
+
 
     def setFootprint(self):
         if self.kicad_mod:
@@ -58,8 +61,30 @@ class ElastomerPadsRouted():
         return val * 25.4
 
 
+    def adjustForGap(self, numPattern, padX, cutMove, pitchX):
+        if numPattern == 0:
+            padX += cutMove
+        else:
+            padX += cutMove - pitchX
+        return padX
+
+
+    def createPad(self, number, x, y, w, h):
+        return Pad(
+            number=number,
+            type=Pad.TYPE_SMT,
+            shape=Pad.SHAPE_RECT,
+            at=[x, y],
+            size=[w, h],
+            layers=['F.Cu', 'F.Mask'],
+            mask=[w-0.1, h-0.1]
+        )
+
+
     def createPads(self, numPads=0, numCols=0, pitchX=0, pitchY=0,
-                   padWidth=0, padHeight=0, cutPadWidth=0, cutPadHeight=0):
+                   padWidth=0, padHeight=0,
+                   cutPadWidth=0, cutPadHeight=0,
+                   cutGapPart=0, numGroups=0):
         padNumber = 1
         padX = 0
         padY = 0
@@ -67,24 +92,22 @@ class ElastomerPadsRouted():
         pitchY = self.inToMM(pitchY)
         padWidth = self.inToMM(padWidth)
         padHeight = self.inToMM(padHeight)
+        
+        numLoops = 1 if numGroups == 0 else numGroups
+        cutMove = 0 if cutGapPart == 0 else self.inToMM(cutGapPart)
 
-        for i in range(numPads):
-            for j in range(numCols):
-                pad = Pad(
-                    number=padNumber,
-                    type=Pad.TYPE_SMT,
-                    shape=Pad.SHAPE_RECT,
-                    at=[padX, padY],
-                    size=[padWidth, padHeight],
-                    layers=['F.Cu', 'F.Mask'],
-                    mask=[padWidth - 0.1, padHeight - 0.1]
-                )
-                self.kicad_mod.append(pad)
-                self.pad_positions.append((padNumber, padX, padY))
-                padNumber += 1
-                padY += pitchY
-            padX += pitchX
-            padY = 0
+        for k in range(numLoops):
+            padX = self.adjustForGap(k, padX, cutMove, pitchX)
+            for i in range(numPads):
+                for j in range(numCols):
+                    pad = self.createPad(padNumber, padX, padY, 
+                                         padWidth, padHeight)
+                    self.kicad_mod.append(pad)
+                    self.pad_positions.append((padNumber, padX, padY))
+                    padNumber += 1
+                    padY += pitchY
+                padX += pitchX
+                padY = 0
 
 
     def connectPads(self, trace_width=0.1):
