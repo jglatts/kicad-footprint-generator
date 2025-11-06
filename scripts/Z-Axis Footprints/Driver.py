@@ -1,4 +1,5 @@
 from ElastomerPadsRouted import ElastomerPadsRouted
+from ElastomerPadBuilder import ElastomerPadBuilder
 
 def zfill621():
     z = ElastomerPadsRouted("zfill-621-rev-b-elastomer-pads")
@@ -51,6 +52,24 @@ def tester():
         numGroups=5,            # number of condunctor-groups in final parts
     )
 
+# use build pattern like below for more complex parts
+def builderTester():
+    pad = (
+        ElastomerPadBuilder("test-for-groups-builder")
+        .withNumPads(10)
+        .withNumCols(5)
+        .withPitchX(0.008)
+        .withPitchY(0.275)
+        .withPadWidth(0.004)
+        .withPadHeight(0.15)
+        .withCutPadWidth(0.08)
+        .withCutPadHeight(.004)
+        .withCutGapPart(0.025591)
+        .withNumGroups(5)
+        .build()
+        )
+    pad.makeFootprint()
+
 
 if __name__ == "__main__":
-    tester()
+    builderTester()
