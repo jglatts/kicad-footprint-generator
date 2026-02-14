@@ -70,6 +70,22 @@ def builderTester():
         )
     builder.makeFootprint()
 
+def aldec_pads():
+    builder = (
+        ElastomerPadBuilder("aldec-zwrap-pads")
+        .withNumPads(52)
+        .withNumCols(6)
+        .withPitchX(0.019685039)
+        .withPitchY(0.17716535)
+        .withPadWidth(0.0137795)
+        .withPadHeight(0.094488)
+        .withCutGapPart(0.03937)
+        .withBlankSize(0.334646)
+        .withNumGroups(3)
+        .build()
+        )
+    builder.makeFootprint()
 
 if __name__ == "__main__":
-    builderTester()
+    aldec_pads()
+    #builderTester()

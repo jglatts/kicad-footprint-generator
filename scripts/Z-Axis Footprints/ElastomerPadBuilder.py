@@ -4,6 +4,8 @@ import sys
 import os
 from tkinter import SEL
 
+from sympy import true
+
 sys.path.append(os.path.join(sys.path[0],".."))
 sys.path.append('../..') # enable package import from parent directory
 
@@ -29,6 +31,7 @@ class ElastomerPadBuilder():
         self.cutPadWidth = 0
         self.cutPadHeight = 0
         self.numGroups = 0
+        self.blankSize = 0
 
 
     def withNumGroups(self, val):
@@ -49,6 +52,9 @@ class ElastomerPadBuilder():
         self.padHeight = self.inToMM(val)
         return self
 
+    def withBlankSize(self, val):
+        self.blankSize = self.inToMM(val)
+        return self
 
     def withPadWidth(self, val):
         self.padWidth = self.inToMM(val)
@@ -136,6 +142,12 @@ class ElastomerPadBuilder():
         numLoops = 1 if self.numGroups == 0 else self.numGroups
         cutMove = 0 if self.cutMove == 0 else self.cutMove
 
+        # adjust for blank size where gold is not fully wrapping around
+        gapBtwnGroupsY = 0
+        if self.blankSize != 0:
+            gapBtwnGroupsY = self.blankSize - self.pitchY
+
+        doMove = False
         for k in range(numLoops):
             padX = self.adjustForGap(k, padX)
             for i in range(self.numPads):
@@ -145,7 +157,12 @@ class ElastomerPadBuilder():
                     self.kicad_mod.append(pad)
                     self.pad_positions.append((padNumber, padX, padY))
                     padNumber += 1
-                    padY += self.pitchY
+                    if doMove:
+                        padY += gapBtwnGroupsY
+                        doMove = False
+                    else:
+                        padY += self.pitchY
+                        doMove = True
                 padX += self.pitchX
                 padY = 0
 
@@ -213,6 +230,9 @@ class ElastomerPadBuilder():
             centered on the first and last columns.
         """
         if not self.pad_positions:
+            return
+
+        if not self.cutPadWidth or not self.cutPadHeight:
             return
 
         # Determine pad bounds
