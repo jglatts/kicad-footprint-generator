@@ -72,14 +72,17 @@ def builderTester():
 
 def aldec_pads():
     builder = (
-        ElastomerPadBuilder("aldec-zwrap-pads")
-        .withNumPads(52)
-        .withNumCols(6)
-        .withPitchX(0.019685039)
-        .withPitchY(0.17716535)
-        .withPadWidth(0.0137795)
-        .withPadHeight(0.094488)
-        .withCutGapPart(0.03937)
+        ElastomerPadBuilder("aldec-zwrap-pads")       
+        .withNumPads(52)                    # num pads in X (1part)
+        .withNumCols(6)                     # num pads in 1col Y (FPC panel)
+        .withPitchX(0.019685039)            # wire pitch X (pads)
+        .withPitchY(0.17716535)             # wire pitch Y (pads)
+        .withPadWidth(0.0137795)            # pad width
+        .withPadHeight(0.094488)            # pad height
+        .withCutGapPart(0.03937)            # cut gap
+        .withOffsetForCutLineY(0.031496)
+        .withCutPadHeight(0.008)
+        .withCutPadWidth(0.16)
         .withBlankSize(0.334646)
         .withNumGroups(3)
         .build()

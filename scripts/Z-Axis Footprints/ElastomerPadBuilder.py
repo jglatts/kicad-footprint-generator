@@ -30,6 +30,7 @@ class ElastomerPadBuilder():
         self.numCols = 0
         self.padWidth = 0
         self.padHeight = 0
+        self.offsetForCutLineY = 0
         self.cutPadWidth = 0
         self.cutPadHeight = 0
         self.numGroups = 0
@@ -47,7 +48,6 @@ class ElastomerPadBuilder():
     def withCutPadWidth(self, val):
         self.cutPadWidth = self.inToMM(val)
         return self
-
 
     def withCutPadHeight(self, val):
         self.cutPadHeight = self.inToMM(val)
@@ -97,6 +97,9 @@ class ElastomerPadBuilder():
         self.pitchY = self.inToMM(val)
         return self
 
+    def withOffsetForCutLineY(self, val):
+        self.offsetForCutLineY = self.inToMM(val)
+        return self
 
     def setFootprint(self):
         if self.kicad_mod:
@@ -134,7 +137,7 @@ class ElastomerPadBuilder():
             at=[x, y],
             size=[w, h],
             layers=['F.Cu', 'F.Mask'],
-            mask=[w-0.1, h-0.1]
+            solder_mask_margin=0.25
         )
 
 
@@ -283,21 +286,23 @@ class ElastomerPadBuilder():
         min_x, max_x = min(xs), max(xs)
         min_y, max_y = min(ys), max(ys)
         
-        cutpadwidth = 4
-        cutpadheight = 0.2
+        if not self.offsetForCutLineY:
+            return
 
-        min_x = min_x - cutpadwidth
-        max_x = max_x + cutpadwidth
+        if not self.cutPadHeight or not self.cutPadWidth:
+            return
+
+        min_x = min_x - self.cutPadWidth
+        max_x = max_x + self.cutPadWidth
         padNumber = max([n for n, _, _ in self.pad_positions]) + 1
         
         # adjust to edge of top of pad
         y = (-1) * (self.padHeight/2)
-        y -= (cutpadheight/2)
+        y -= (self.cutPadHeight/2)
 
         # adjust to our offset
-        y -= 0.8 - (cutpadheight/2)
+        y -= self.offsetForCutLineY - (self.cutPadHeight/2)
         numLines = int((self.numCols/2)+1)        
-        
 
         for i in range(numLines):
             cut_pad_left = Pad(
@@ -305,7 +310,7 @@ class ElastomerPadBuilder():
                 type=Pad.TYPE_SMT,
                 shape=Pad.SHAPE_RECT,
                 at=[min_x, y],
-                size=[cutpadwidth, cutpadheight],
+                size=[self.cutPadWidth, self.cutPadHeight],
                 layers=['F.Cu', 'F.Mask'],
                 orientation=0  # horizontal
             )
@@ -314,8 +319,7 @@ class ElastomerPadBuilder():
                 type=Pad.TYPE_SMT,
                 shape=Pad.SHAPE_RECT,
                 at=[max_x, y],
-                #size=[self.cutPadWidth, self.cutPadHeight],
-                size=[cutpadwidth, cutpadheight],
+                size=[self.cutPadWidth, self.cutPadHeight],
                 layers=['F.Cu', 'F.Mask'],
                 orientation=0  # horizontal
             )
@@ -328,10 +332,10 @@ class ElastomerPadBuilder():
     def makeFootprint(self):
         self.setFootprint()
         self.createPads()
-        self.connectPads(trace_width=0.004) 
-        self.addEdgeCuts(clearanceX=3.5, clearanceY=2.5)
-        self.makeCutLines()
+        self.connectPads(trace_width=0.0137795) 
+        #self.makeCutLines()
         self.makeCutLinesWrap()
+        self.addEdgeCuts(clearanceX=7.5, clearanceY=3.5)
         self.printFootprintInfo()
         self.save(self.footprint_name + ".kicad_mod")
 
