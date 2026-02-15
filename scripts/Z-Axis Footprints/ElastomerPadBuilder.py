@@ -287,7 +287,7 @@ class ElastomerPadBuilder():
         cutpadheight = 0.2
 
         min_x = min_x - cutpadwidth
-        max_x = max_x + cutpadheight
+        max_x = max_x + cutpadwidth
         padNumber = max([n for n, _, _ in self.pad_positions]) + 1
         
         # adjust to edge of top of pad
@@ -295,9 +295,11 @@ class ElastomerPadBuilder():
         y -= (cutpadheight/2)
 
         # adjust to our offset
-        y -= 0.8
+        y -= 0.8 - (cutpadheight/2)
+        numLines = int((self.numCols/2)+1)        
         
-        for i in range(self.numCols):
+
+        for i in range(numLines):
             cut_pad_left = Pad(
                 number=padNumber,
                 type=Pad.TYPE_SMT,
