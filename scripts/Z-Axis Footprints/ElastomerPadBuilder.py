@@ -14,6 +14,7 @@ from KicadModTree.nodes.specialized.PadArray import PadArray
 from collections import defaultdict
 
 
+# works well, but names could be better 
 class ElastomerPadBuilder():
     def __init__(self, name):
         self.footprint_name = name
@@ -24,6 +25,7 @@ class ElastomerPadBuilder():
         self.cutMove = 0
         self.pitchX = 0
         self.pitchY = 0
+        self.numPadsInX = 0
         self.numPads = 0
         self.numCols = 0
         self.padWidth = 0
@@ -38,6 +40,9 @@ class ElastomerPadBuilder():
         self.numGroups = val
         return self
 
+    def withNumPadsInX(self, val):
+        self.numPadsInX = val
+        return self
 
     def withCutPadWidth(self, val):
         self.cutPadWidth = self.inToMM(val)
@@ -271,12 +276,60 @@ class ElastomerPadBuilder():
             self.kicad_mod.append(cut_pad_right)
 
 
+    def makeCutLinesWrap(self):
+        # Determine pad bounds
+        xs = [x for _, x, _ in self.pad_positions]
+        ys = [y for _, _, y in self.pad_positions]
+        min_x, max_x = min(xs), max(xs)
+        min_y, max_y = min(ys), max(ys)
+        
+        cutpadwidth = 4
+        cutpadheight = 0.2
+
+        min_x = min_x - cutpadwidth
+        max_x = max_x + cutpadheight
+        padNumber = max([n for n, _, _ in self.pad_positions]) + 1
+        
+        # adjust to edge of top of pad
+        y = (-1) * (self.padHeight/2)
+        y -= (cutpadheight/2)
+
+        # adjust to our offset
+        y -= 0.8
+        
+        for i in range(self.numCols):
+            cut_pad_left = Pad(
+                number=padNumber,
+                type=Pad.TYPE_SMT,
+                shape=Pad.SHAPE_RECT,
+                at=[min_x, y],
+                size=[cutpadwidth, cutpadheight],
+                layers=['F.Cu', 'F.Mask'],
+                orientation=0  # horizontal
+            )
+            cut_pad_right = Pad(
+                number=padNumber+1,
+                type=Pad.TYPE_SMT,
+                shape=Pad.SHAPE_RECT,
+                at=[max_x, y],
+                #size=[self.cutPadWidth, self.cutPadHeight],
+                size=[cutpadwidth, cutpadheight],
+                layers=['F.Cu', 'F.Mask'],
+                orientation=0  # horizontal
+            )
+            y += self.blankSize
+            padNumber += 2
+            self.kicad_mod.append(cut_pad_left)
+            self.kicad_mod.append(cut_pad_right)
+
+
     def makeFootprint(self):
         self.setFootprint()
         self.createPads()
         self.connectPads(trace_width=0.004) 
         self.addEdgeCuts(clearanceX=3.5, clearanceY=2.5)
         self.makeCutLines()
+        self.makeCutLinesWrap()
         self.printFootprintInfo()
         self.save(self.footprint_name + ".kicad_mod")
 
