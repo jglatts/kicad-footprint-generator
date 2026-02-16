@@ -1,3 +1,5 @@
+import sys
+
 from ElastomerPadsRouted import ElastomerPadsRouted
 from ElastomerPadBuilder import ElastomerPadBuilder
 
@@ -89,6 +91,56 @@ def aldec_pads():
         )
     builder.makeFootprint()
 
+
+def run_from_ui():
+
+    # Expecting exactly 13 arguments after the script name
+    if len(sys.argv) < 14:
+        print("Usage: python Driver.py panelName numPadsX padPitchX padPitchY cutGap padWidth padHeight cutPadWidth cutPadHeight cutPadOffset blankSize numRepeatX numRepeatY")
+        sys.exit(1)
+
+    # Extract arguments
+    panelName = sys.argv[1]
+    numPadsX = int(sys.argv[2])
+    padPitchX = float(sys.argv[3])
+    padPitchY = float(sys.argv[4])
+    cutGap = float(sys.argv[5])
+    padWidth = float(sys.argv[6])
+    padHeight = float(sys.argv[7])
+    cutPadWidth = float(sys.argv[8])
+    cutPadHeight = float(sys.argv[9])
+    cutPadOffset = float(sys.argv[10])
+    blankSize = float(sys.argv[11])
+    numRepeatX = int(sys.argv[12])
+    numRepeatY = int(sys.argv[13])
+
+    print(f"panelName: {panelName}")
+    print(f"numPadsX: {numPadsX}\npadPitchX: {padPitchX}\npadPitchY: {padPitchY}\n")
+    print(f"cutGap: {cutGap}\npadWidth: {padWidth}\npadHeight: {padHeight}\n")
+    print(f"cutPadWidth: {cutPadWidth}\ncutPadHeight: {cutPadHeight}\ncutPadOffset: {cutPadOffset}\n")
+    print(f"blankSize: {blankSize}\nnumRepeatX: {numRepeatX}\nnumRepeatY: {numRepeatY}\n")
+
+    # Build the Elastomer pad using builder pattern
+    builder = (
+        ElastomerPadBuilder(panelName)
+        .withNumPads(numPadsX)
+        .withNumCols(2*numRepeatY)        
+        .withPitchX(padPitchX)
+        .withPitchY(padPitchY)
+        .withPadWidth(padWidth)
+        .withPadHeight(padHeight)
+        .withCutPadWidth(cutPadWidth)
+        .withCutPadHeight(cutPadHeight)
+        .withCutGapPart(cutGap)
+        .withOffsetForCutLineY(cutPadOffset)
+        .withBlankSize(blankSize)
+        .withNumGroups(numRepeatX)
+        .build()
+    )
+
+    builder.makeFootprint()
+
 if __name__ == "__main__":
-    aldec_pads()
+    run_from_ui()
+    #aldec_pads()
     #builderTester()

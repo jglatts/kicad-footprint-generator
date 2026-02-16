@@ -33,11 +33,12 @@ Notes:
 """
 import sys
 import os
-from tkinter import SEL
 
-sys.path.append(os.path.join(sys.path[0],".."))
-sys.path.append('../..') # enable package import from parent directory
-
+# Absolute path to where KicadModTree lives in your repo
+kmt_path = r"C:\Users\jglatts\Documents\Z-Axis\kicad-footprint-generator"
+if kmt_path not in sys.path:
+    sys.path.append(kmt_path)
+    
 from KicadModTree import *
 from KicadModTree.nodes.specialized.PadArray import PadArray
 from collections import defaultdict
