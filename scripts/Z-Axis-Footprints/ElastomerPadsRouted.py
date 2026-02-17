@@ -33,9 +33,12 @@ Notes:
 """
 import sys
 import os
+from collections import defaultdict
+
 
 # Absolute path to where KicadModTree lives in your repo
-kmt_path = r"C:\Users\jglatts\Documents\Z-Axis\kicad-footprint-generator"
+#kmt_path = r"C:\Users\jglatts\Documents\Z-Axis\kicad-footprint-generator"
+kmt_path = r"\\fs1\zaxis\Manufacturing\FPC Panel Design\Automated Panel Design\kicad-footprint-generator"
 if kmt_path not in sys.path:
     sys.path.append(kmt_path)
     

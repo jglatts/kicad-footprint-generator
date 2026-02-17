@@ -4,7 +4,6 @@ import sys
 import os
 from tkinter import SEL
 
-from sympy import true
 
 sys.path.append(os.path.join(sys.path[0],".."))
 sys.path.append('../..') # enable package import from parent directory
@@ -279,6 +278,61 @@ class ElastomerPadBuilder():
             self.kicad_mod.append(cut_pad_right)
 
 
+    def connectTopAndBottomRowsVertical(self, extension_mm=1.5, trace_width=0.1):
+        """
+        Adds vertical copper traces centered in each pad
+        on the top row and bottom row.
+
+        Each trace extends beyond pad height by extension_mm.
+        """
+
+        if not self.pad_positions:
+            return
+
+        from collections import defaultdict
+        rows = defaultdict(list)
+
+        if self.padWidth != 0:
+            trace_width = self.padWidth
+
+        # Group pads by Y coordinate
+        for pad_num, x, y in self.pad_positions:
+            rows[round(y, 5)].append((pad_num, x, y))
+
+        sorted_row_keys = sorted(rows.keys())
+        bottom_row_y = sorted_row_keys[0]
+        top_row_y = sorted_row_keys[-1]
+
+        bottom_row = rows[bottom_row_y]
+        top_row = rows[top_row_y]
+
+        # ---- Bottom row vertical traces ----
+        for pad_num, x, y in bottom_row:
+            y_start = y - self.padHeight / 2 - extension_mm
+            y_end = y + self.padHeight / 2 + extension_mm
+
+            line = Line(
+                start=[x, y_start],
+                end=[x, y_end],
+                layer='F.Cu',
+                width=trace_width
+            )
+            self.kicad_mod.append(line)
+
+        # ---- Top row vertical traces ----
+        for pad_num, x, y in top_row:
+            y_start = y - self.padHeight / 2 - extension_mm
+            y_end = y + self.padHeight / 2 + extension_mm
+
+            line = Line(
+                start=[x, y_start],
+                end=[x, y_end],
+                layer='F.Cu',
+                width=trace_width
+            )
+            self.kicad_mod.append(line)
+
+
     def makeCutLinesWrap(self):
         # Determine pad bounds
         xs = [x for _, x, _ in self.pad_positions]
@@ -336,6 +390,7 @@ class ElastomerPadBuilder():
         #self.makeCutLines()
         self.makeCutLinesWrap()
         self.addEdgeCuts(clearanceX=7.5, clearanceY=3.5)
+        self.connectTopAndBottomRowsVertical()
         self.printFootprintInfo()
         self.save(self.footprint_name + ".kicad_mod")
 
